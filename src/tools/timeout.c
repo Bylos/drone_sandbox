@@ -33,7 +33,6 @@ static timer_t               timeout_timer;
 static volatile __sig_atomic_t timeout_state[TIMEOUTS] = { 0 };
 static struct timespec       timeout_time[TIMEOUTS];
 
-
 /* Return the number of seconds between before and after, (after - before).
  * This must be async-signal safe, so it cannot use difftime().
 */

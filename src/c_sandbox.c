@@ -44,10 +44,10 @@ int main(void) {
 
 	uart_init();
 
-	lms_init(i2c, B_UP);
-	lms_accel_start(A_SCALE_4G, A_ODR_100, A_ABW_50);
-	lms_magn_start(M_SCALE_2GS, M_ODR_125);
-	lms_gyro_start(G_SCALE_500DPS, G_ODR_190_BW_125);
+	lsm_init(i2c, B_UP);
+	lsm_accel_start(A_SCALE_4G, A_ODR_100, A_ABW_50);
+	lsm_magn_start(M_SCALE_2GS, M_ODR_125);
+	lsm_gyro_start(G_SCALE_500DPS, G_ODR_190_BW_125);
 
 	esc_init(i2c);
 
@@ -121,9 +121,9 @@ int main(void) {
 
 
 void update_IMU(void) {
-	lms_accel_read();
-	lms_magn_read();
-	lms_gyro_read();
+	lsm_accel_read();
+	lsm_magn_read();
+	lsm_gyro_read();
 
 //	ahrs_Madgwick2014(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f, mx, my, -mz);
 	ahrs_Madgwick2015(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f, mx, my, -mz);

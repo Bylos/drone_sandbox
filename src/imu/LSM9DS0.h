@@ -1,131 +1,132 @@
 /*
-LSM9DS0.h
-Implements low-level communication and provides convenient functions to
-control LSM9DS0 on the Intel Edison Platform with I2C bus
+ * LSM9DS0.h
+ * Implements low-level communication and provides convenient functions to
+ * control LSM9DS0 on the Intel Edison Platform with I2C bus
+ *
+ * Copyright (C) 2015  Bylos & Korky
+ * Thanks to Jim Lindblom, Taylor Andrews
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-Copyright (C) 2015  Bylos & Korky
-Thanks to Jim Lindblom, Taylor Andrews
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-#ifndef LMS9D0_H_
-#define LMS9D0_H_
+#ifndef _LSM9D0_H_
+#define _LSM9D0_H_
 
 #include <mraa.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+// Accelerometer, Gyroscope and Magnetometer values declaration
 extern volatile float ax, ay, az, mx, my, mz, gx, gy, gz;
 
 ///////////////////////////
 // LSM9DS0 I2C Addresses //
 ///////////////////////////
-#define LMS_ADDRESS_G			0x6B
-#define LMS_ADDRESS_XM			0x1D
+#define LSM_ADDRESS_G			0x6B
+#define LSM_ADDRESS_XM			0x1D
 
 ////////////////////////////////
 // LSM9DS0 Gyro (G) Registers //
 ////////////////////////////////
-#define LMS_WHO_AM_I_G          0x0F
-#define LMS_CTRL_REG1_G         0x20
-#define LMS_CTRL_REG2_G         0x21
-#define LMS_CTRL_REG3_G         0x22
-#define LMS_CTRL_REG4_G         0x23
-#define LMS_CTRL_REG5_G         0x24
-#define LMS_REFERENCE_G         0x25
-#define LMS_STATUS_REG_G        0x27
-#define LMS_OUT_X_L_G           0x28
-#define LMS_OUT_X_H_G           0x29
-#define LMS_OUT_Y_L_G           0x2A
-#define LMS_OUT_Y_H_G           0x2B
-#define LMS_OUT_Z_L_G           0x2C
-#define LMS_OUT_Z_H_G           0x2D
-#define LMS_FIFO_CTRL_REG_G     0x2E
-#define LMS_FIFO_SRC_REG_G      0x2F
-#define LMS_INT1_CFG_G          0x30
-#define LMS_INT1_SRC_G          0x31
-#define LMS_INT1_THS_XH_G       0x32
-#define LMS_INT1_THS_XL_G       0x33
-#define LMS_INT1_THS_YH_G       0x34
-#define LMS_INT1_THS_YL_G       0x35
-#define LMS_INT1_THS_ZH_G       0x36
-#define LMS_INT1_THS_ZL_G       0x37
-#define LMS_INT1_DURATION_G     0x38
+#define LSM_WHO_AM_I_G          0x0F
+#define LSM_CTRL_REG1_G         0x20
+#define LSM_CTRL_REG2_G         0x21
+#define LSM_CTRL_REG3_G         0x22
+#define LSM_CTRL_REG4_G         0x23
+#define LSM_CTRL_REG5_G         0x24
+#define LSM_REFERENCE_G         0x25
+#define LSM_STATUS_REG_G        0x27
+#define LSM_OUT_X_L_G           0x28
+#define LSM_OUT_X_H_G           0x29
+#define LSM_OUT_Y_L_G           0x2A
+#define LSM_OUT_Y_H_G           0x2B
+#define LSM_OUT_Z_L_G           0x2C
+#define LSM_OUT_Z_H_G           0x2D
+#define LSM_FIFO_CTRL_REG_G     0x2E
+#define LSM_FIFO_SRC_REG_G      0x2F
+#define LSM_INT1_CFG_G          0x30
+#define LSM_INT1_SRC_G          0x31
+#define LSM_INT1_THS_XH_G       0x32
+#define LSM_INT1_THS_XL_G       0x33
+#define LSM_INT1_THS_YH_G       0x34
+#define LSM_INT1_THS_YL_G       0x35
+#define LSM_INT1_THS_ZH_G       0x36
+#define LSM_INT1_THS_ZL_G       0x37
+#define LSM_INT1_DURATION_G     0x38
 
 //////////////////////////////////////////
 // LSM9DS0 Accel/Magneto (XM) Registers //
 //////////////////////////////////////////
-#define LMS_OUT_TEMP_L_XM       0x05
-#define LMS_OUT_TEMP_H_XM       0x06
-#define LMS_STATUS_REG_M        0x07
-#define LMS_OUT_X_L_M           0x08
-#define LMS_OUT_X_H_M           0x09
-#define LMS_OUT_Y_L_M           0x0A
-#define LMS_OUT_Y_H_M           0x0B
-#define LMS_OUT_Z_L_M           0x0C
-#define LMS_OUT_Z_H_M           0x0D
-#define LMS_WHO_AM_I_XM         0x0F
-#define LMS_INT_CTRL_REG_M      0x12
-#define LMS_INT_SRC_REG_M       0x13
-#define LMS_INT_THS_L_M         0x14
-#define LMS_INT_THS_H_M         0x15
-#define LMS_OFFSET_X_L_M        0x16
-#define LMS_OFFSET_X_H_M        0x17
-#define LMS_OFFSET_Y_L_M        0x18
-#define LMS_OFFSET_Y_H_M        0x19
-#define LMS_OFFSET_Z_L_M        0x1A
-#define LMS_OFFSET_Z_H_M        0x1B
-#define LMS_REFERENCE_X         0x1C
-#define LMS_REFERENCE_Y         0x1D
-#define LMS_REFERENCE_Z         0x1E
-#define LMS_CTRL_REG0_XM        0x1F
-#define LMS_CTRL_REG1_XM        0x20
-#define LMS_CTRL_REG2_XM        0x21
-#define LMS_CTRL_REG3_XM        0x22
-#define LMS_CTRL_REG4_XM        0x23
-#define LMS_CTRL_REG5_XM        0x24
-#define LMS_CTRL_REG6_XM        0x25
-#define LMS_CTRL_REG7_XM        0x26
-#define LMS_STATUS_REG_A        0x27
-#define LMS_OUT_X_L_A           0x28
-#define LMS_OUT_X_H_A           0x29
-#define LMS_OUT_Y_L_A           0x2A
-#define LMS_OUT_Y_H_A           0x2B
-#define LMS_OUT_Z_L_A           0x2C
-#define LMS_OUT_Z_H_A           0x2D
-#define LMS_FIFO_CTRL_REG       0x2E
-#define LMS_FIFO_SRC_REG        0x2F
-#define LMS_INT_GEN_1_REG       0x30
-#define LMS_INT_GEN_1_SRC       0x31
-#define LMS_INT_GEN_1_THS       0x32
-#define LMS_INT_GEN_1_DURATION  0x33
-#define LMS_INT_GEN_2_REG       0x34
-#define LMS_INT_GEN_2_SRC       0x35
-#define LMS_INT_GEN_2_THS       0x36
-#define LMS_INT_GEN_2_DURATION  0x37
-#define LMS_CLICK_CFG           0x38
-#define LMS_CLICK_SRC           0x39
-#define LMS_CLICK_THS           0x3A
-#define LMS_TIME_LIMIT          0x3B
-#define LMS_TIME_LATENCY        0x3C
-#define LMS_TIME_WINDOW         0x3D
-#define LMS_ACT_THS             0x3E
-#define LMS_ACT_DUR             0x3F
+#define LSM_OUT_TEMP_L_XM       0x05
+#define LSM_OUT_TEMP_H_XM       0x06
+#define LSM_STATUS_REG_M        0x07
+#define LSM_OUT_X_L_M           0x08
+#define LSM_OUT_X_H_M           0x09
+#define LSM_OUT_Y_L_M           0x0A
+#define LSM_OUT_Y_H_M           0x0B
+#define LSM_OUT_Z_L_M           0x0C
+#define LSM_OUT_Z_H_M           0x0D
+#define LSM_WHO_AM_I_XM         0x0F
+#define LSM_INT_CTRL_REG_M      0x12
+#define LSM_INT_SRC_REG_M       0x13
+#define LSM_INT_THS_L_M         0x14
+#define LSM_INT_THS_H_M         0x15
+#define LSM_OFFSET_X_L_M        0x16
+#define LSM_OFFSET_X_H_M        0x17
+#define LSM_OFFSET_Y_L_M        0x18
+#define LSM_OFFSET_Y_H_M        0x19
+#define LSM_OFFSET_Z_L_M        0x1A
+#define LSM_OFFSET_Z_H_M        0x1B
+#define LSM_REFERENCE_X         0x1C
+#define LSM_REFERENCE_Y         0x1D
+#define LSM_REFERENCE_Z         0x1E
+#define LSM_CTRL_REG0_XM        0x1F
+#define LSM_CTRL_REG1_XM        0x20
+#define LSM_CTRL_REG2_XM        0x21
+#define LSM_CTRL_REG3_XM        0x22
+#define LSM_CTRL_REG4_XM        0x23
+#define LSM_CTRL_REG5_XM        0x24
+#define LSM_CTRL_REG6_XM        0x25
+#define LSM_CTRL_REG7_XM        0x26
+#define LSM_STATUS_REG_A        0x27
+#define LSM_OUT_X_L_A           0x28
+#define LSM_OUT_X_H_A           0x29
+#define LSM_OUT_Y_L_A           0x2A
+#define LSM_OUT_Y_H_A           0x2B
+#define LSM_OUT_Z_L_A           0x2C
+#define LSM_OUT_Z_H_A           0x2D
+#define LSM_FIFO_CTRL_REG       0x2E
+#define LSM_FIFO_SRC_REG        0x2F
+#define LSM_INT_GEN_1_REG       0x30
+#define LSM_INT_GEN_1_SRC       0x31
+#define LSM_INT_GEN_1_THS       0x32
+#define LSM_INT_GEN_1_DURATION  0x33
+#define LSM_INT_GEN_2_REG       0x34
+#define LSM_INT_GEN_2_SRC       0x35
+#define LSM_INT_GEN_2_THS       0x36
+#define LSM_INT_GEN_2_DURATION  0x37
+#define LSM_CLICK_CFG           0x38
+#define LSM_CLICK_SRC           0x39
+#define LSM_CLICK_THS           0x3A
+#define LSM_TIME_LIMIT          0x3B
+#define LSM_TIME_LATENCY        0x3C
+#define LSM_TIME_WINDOW         0x3D
+#define LSM_ACT_THS             0x3E
+#define LSM_ACT_DUR             0x3F
 
-// edison board orientation
+// Edison board orientation
 typedef enum
 {
 	B_UP = 1,
@@ -142,7 +143,7 @@ typedef enum
 	A_SCALE_16G // 100: +/- 16g
 } accel_scale_t;
 
-// accel_oder defines all possible output data rates of the accelerometer:
+// accel_odr defines all possible output data rates of the accelerometer:
 typedef enum
 {
 	A_POWER_DOWN,   // Power-down mode (0x0)
@@ -216,39 +217,39 @@ typedef enum
 } magn_odr_t;
 
 /*
- * lms_init get i2c context for future communications
+ * lsm_init get i2c context for future communications
  * Return 0 if i2c bus is valid
  */
-int lms_init(mraa_i2c_context i2c_context, board_side_t side);
+int lsm_init(mraa_i2c_context i2c_context, board_side_t side);
 
 /*
- * lms_accel_start set up and start acceleration sampling
+ * lsm_accel_start set up and start acceleration sampling
  */
-void lms_accel_start(accel_scale_t scale, accel_odr_t odr, accel_abw_t abw);
+void lsm_accel_start(accel_scale_t scale, accel_odr_t odr, accel_abw_t abw);
 
 /*
- * lms_gyro_start set up and start gyroscope sampling
+ * lsm_gyro_start set up and start gyroscope sampling
  */
-void lms_gyro_start(gyro_scale_t scale, gyro_odr_t odr);
+void lsm_gyro_start(gyro_scale_t scale, gyro_odr_t odr);
 
 /*
- * lms_magn_start set up and start magnetometer sampling
+ * lsm_magn_start set up and start magnetometer sampling
  */
-void lms_magn_start(magn_scale_t scale, magn_odr_t odr);
+void lsm_magn_start(magn_scale_t scale, magn_odr_t odr);
 
 /*
- * lms_accel_read store acceleration values in ax, ay, az
+ * lsm_accel_read store acceleration values in ax, ay, az
  */
-void lms_accel_read(void);
+void lsm_accel_read(void);
 
 /*
- * lms_gyro_read store gyroscopic values in gx, gy, gz
+ * lsm_gyro_read store gyroscopic values in gx, gy, gz
  */
-void lms_gyro_read(void);
+void lsm_gyro_read(void);
 
 /*
- * lms_magn_read store magnetometer values in mx, my, mz
+ * lsm_magn_read store magnetometer values in mx, my, mz
  */
-void lms_magn_read(void);
+void lsm_magn_read(void);
 
-#endif /* LMS9D0_H_ */
+#endif /* _LSM9D0_H_ */

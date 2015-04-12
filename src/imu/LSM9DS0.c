@@ -40,13 +40,13 @@ static float gyro_res = 1;
 // I2C Bus Low Level Communication Functions //
 ///////////////////////////////////////////////
 
-mraa_result_t lms_write_byte_data(const uint8_t address, const uint8_t data, const uint8_t command) {
+mraa_result_t lsm_write_byte_data(const uint8_t address, const uint8_t data, const uint8_t command) {
 	if(i2c == NULL) return MRAA_ERROR_INVALID_RESOURCE;
 	mraa_i2c_address(i2c, address);
 	return mraa_i2c_write_byte_data(i2c, data, command);
 }
 
-uint8_t lms_read_byte_data(const uint8_t address, const uint8_t command) {
+uint8_t lsm_read_byte_data(const uint8_t address, const uint8_t command) {
 	if(i2c == NULL) return -1;
 	mraa_i2c_address(i2c, address);
 	return mraa_i2c_read_byte_data(i2c, command);
@@ -56,35 +56,35 @@ uint8_t lms_read_byte_data(const uint8_t address, const uint8_t command) {
 // Accelero and Gyro Bias Calculation //
 ////////////////////////////////////////
 
-void lms_gyro_bias(void) {
+void lsm_gyro_bias(void) {
 	int32_t tempx = 0, tempy = 0, tempz = 0;
 
 	// Setup FIFO mode
-	uint8_t ctrl_reg5_g = lms_read_byte_data(LMS_ADDRESS_G, LMS_CTRL_REG5_G);
-	lms_write_byte_data(LMS_ADDRESS_G, ctrl_reg5_g | 0x40, LMS_CTRL_REG5_G);
+	uint8_t ctrl_reg5_g = lsm_read_byte_data(LSM_ADDRESS_G, LSM_CTRL_REG5_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, ctrl_reg5_g | 0x40, LSM_CTRL_REG5_G);
 	usleep(20000);
-	lms_write_byte_data(LMS_ADDRESS_G, 0x20|0x1F, LMS_FIFO_CTRL_REG_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, 0x20|0x1F, LSM_FIFO_CTRL_REG_G);
 	usleep(320000);
 
 	// Get samples and average bias
-	int samples = (lms_read_byte_data(LMS_ADDRESS_G, LMS_FIFO_SRC_REG_G) & 0x1F);
+	int samples = (lsm_read_byte_data(LSM_ADDRESS_G, LSM_FIFO_SRC_REG_G) & 0x1F);
 	uint16_t u_value;
 	int16_t *s_value = (int16_t*)(&u_value);
 	int ii;
 	for (ii = 0; ii < samples; ii++) {
-		u_value = lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_X_H_G);
+		u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_H_G);
 		u_value = u_value << 8;
-		u_value += lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_X_L_G);
+		u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_L_G);
 		tempx += *s_value;
 
-		u_value = lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Y_H_G);
+		u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Y_H_G);
 		u_value = u_value << 8;
-		u_value += lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Y_L_G);
+		u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Y_L_G);
 		tempy += *s_value;
 
-		u_value = lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Z_H_G);
+		u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Z_H_G);
 		u_value = u_value << 8;
-		u_value += lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Z_L_G);
+		u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Z_L_G);
 		tempz += *s_value;
 	}
 	gxb = (int16_t)(tempx/samples);
@@ -97,41 +97,41 @@ void lms_gyro_bias(void) {
 	fclose(fd);
 
 	// Setup bypass (normal) mode
-	ctrl_reg5_g = lms_read_byte_data(LMS_ADDRESS_G, LMS_CTRL_REG5_G);
-	lms_write_byte_data(LMS_ADDRESS_G, ctrl_reg5_g & ~0x40, LMS_CTRL_REG5_G);
+	ctrl_reg5_g = lsm_read_byte_data(LSM_ADDRESS_G, LSM_CTRL_REG5_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, ctrl_reg5_g & ~0x40, LSM_CTRL_REG5_G);
 	usleep(20000);
-	lms_write_byte_data(LMS_ADDRESS_G, 0x00, LMS_FIFO_CTRL_REG_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, 0x00, LSM_FIFO_CTRL_REG_G);
 }
 
-void lms_accel_bias(void) {
+void lsm_accel_bias(void) {
 	int32_t tempx = 0, tempy = 0, tempz = 0;
 
 	// Setup FIFO mode
-	uint8_t ctrl_reg0_xm = lms_read_byte_data(LMS_ADDRESS_XM, LMS_CTRL_REG0_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, ctrl_reg0_xm | 0x40, LMS_CTRL_REG0_XM);
+	uint8_t ctrl_reg0_xm = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_CTRL_REG0_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, ctrl_reg0_xm | 0x40, LSM_CTRL_REG0_XM);
 	usleep(20000);
-	lms_write_byte_data(LMS_ADDRESS_XM, 0x20|0x1F, LMS_FIFO_CTRL_REG);
+	lsm_write_byte_data(LSM_ADDRESS_XM, 0x20|0x1F, LSM_FIFO_CTRL_REG);
 	usleep(320000);
 
 	// Get samples and average bias
-	int samples = (lms_read_byte_data(LMS_ADDRESS_XM, LMS_FIFO_SRC_REG) & 0x1F);
+	int samples = (lsm_read_byte_data(LSM_ADDRESS_XM, LSM_FIFO_SRC_REG) & 0x1F);
 	uint16_t u_value;
 	int16_t *s_value = (int16_t*)(&u_value);
 	int ii;
 	for (ii = 0; ii < samples; ii++) {
-		u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_X_H_A);
+		u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_H_A);
 		u_value = u_value << 8;
-		u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_X_L_A);
+		u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_L_A);
 		tempx += *s_value;
 
-		u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Y_H_A);
+		u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Y_H_A);
 		u_value = u_value << 8;
-		u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Y_L_A);
+		u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Y_L_A);
 		tempy += *s_value;
 
-		u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Z_H_A);
+		u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Z_H_A);
 		u_value = u_value << 8;
-		u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Z_L_A);
+		u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Z_L_A);
 		tempz += *s_value + (int16_t)(1/accel_res);
 	}
 	axb = (int16_t)(tempx/samples);
@@ -144,19 +144,19 @@ void lms_accel_bias(void) {
 	fclose(fd);
 
 	// Setup bypass (normal) mode
-	ctrl_reg0_xm = lms_read_byte_data(LMS_ADDRESS_XM, LMS_CTRL_REG0_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, ctrl_reg0_xm & ~0x40, LMS_CTRL_REG0_XM);
+	ctrl_reg0_xm = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_CTRL_REG0_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, ctrl_reg0_xm & ~0x40, LSM_CTRL_REG0_XM);
 	usleep(20000);
-	lms_write_byte_data(LMS_ADDRESS_XM, 0x00, LMS_FIFO_CTRL_REG);
+	lsm_write_byte_data(LSM_ADDRESS_XM, 0x00, LSM_FIFO_CTRL_REG);
 }
 
 //////////////////////////////
 // Initialization Functions //
 //////////////////////////////
 
-int lms_init(mraa_i2c_context i2c_context, board_side_t side) {
+int lsm_init(mraa_i2c_context i2c_context, board_side_t side) {
 	if((i2c = i2c_context) == NULL) {
-		printf("LMS9D0 Init : Wrong i2c context");
+		printf("LSM9D0 Init : Wrong i2c context");
 		return -1;
 	}
 	board_side = (float)side;
@@ -164,33 +164,33 @@ int lms_init(mraa_i2c_context i2c_context, board_side_t side) {
 	return 0;
 }
 
-void lms_accel_start(accel_scale_t scale, accel_odr_t odr, accel_abw_t abw) {
-	lms_write_byte_data(LMS_ADDRESS_XM, 0b00000000, LMS_CTRL_REG0_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, 0b00000111 | (odr << 4) , LMS_CTRL_REG1_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, (abw << 6) | (scale << 3), LMS_CTRL_REG2_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, 0b00000000, LMS_CTRL_REG3_XM);
+void lsm_accel_start(accel_scale_t scale, accel_odr_t odr, accel_abw_t abw) {
+	lsm_write_byte_data(LSM_ADDRESS_XM, 0b00000000, LSM_CTRL_REG0_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, 0b00000111 | (odr << 4) , LSM_CTRL_REG1_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, (abw << 6) | (scale << 3), LSM_CTRL_REG2_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, 0b00000000, LSM_CTRL_REG3_XM);
 
     accel_res = scale == A_SCALE_16G ? 16.0f / 32768.0f :
            (((float) scale + 1.0f) * 2.0f) / 32768.0f;
 
-    lms_accel_bias();
+    lsm_accel_bias();
 }
 
-void lms_magn_start(magn_scale_t scale, magn_odr_t odr) {
-	lms_write_byte_data(LMS_ADDRESS_XM, odr << 2, LMS_CTRL_REG5_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, scale << 5, LMS_CTRL_REG6_XM);
-	lms_write_byte_data(LMS_ADDRESS_XM, 0b00000000, LMS_CTRL_REG7_XM);
+void lsm_magn_start(magn_scale_t scale, magn_odr_t odr) {
+	lsm_write_byte_data(LSM_ADDRESS_XM, odr << 2, LSM_CTRL_REG5_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, scale << 5, LSM_CTRL_REG6_XM);
+	lsm_write_byte_data(LSM_ADDRESS_XM, 0b00000000, LSM_CTRL_REG7_XM);
 
 	magn_res = scale == M_SCALE_2GS ? 2.0f / 32768.0f :
 	           (float) (scale << 2) / 32768.0f;
 }
 
-void lms_gyro_start(gyro_scale_t scale, gyro_odr_t odr) {
-	lms_write_byte_data(LMS_ADDRESS_G, 0b00001111 | (odr << 4), LMS_CTRL_REG1_G);
-	lms_write_byte_data(LMS_ADDRESS_G, 0b00000000, LMS_CTRL_REG2_G);
-	lms_write_byte_data(LMS_ADDRESS_G, 0b00000000, LMS_CTRL_REG3_G);
-	lms_write_byte_data(LMS_ADDRESS_G, scale << 4, LMS_CTRL_REG4_G);
-	lms_write_byte_data(LMS_ADDRESS_G, 0b00000000, LMS_CTRL_REG5_G);
+void lsm_gyro_start(gyro_scale_t scale, gyro_odr_t odr) {
+	lsm_write_byte_data(LSM_ADDRESS_G, 0b00001111 | (odr << 4), LSM_CTRL_REG1_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, 0b00000000, LSM_CTRL_REG2_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, 0b00000000, LSM_CTRL_REG3_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, scale << 4, LSM_CTRL_REG4_G);
+	lsm_write_byte_data(LSM_ADDRESS_G, 0b00000000, LSM_CTRL_REG5_G);
 
     switch (scale)
     {
@@ -205,60 +205,60 @@ void lms_gyro_start(gyro_scale_t scale, gyro_odr_t odr) {
         break;
     }
 
-    lms_gyro_bias();
+    lsm_gyro_bias();
 }
 
 ////////////////////////////
 // Sensors Read Functions //
 ////////////////////////////
 
-void lms_accel_read(void) {
+void lsm_accel_read(void) {
 	uint16_t u_value;
 	int16_t *s_value = (int16_t *)(&u_value);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_X_H_A);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_H_A);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_X_L_A);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_L_A);
 	ax = accel_res * (float)(*s_value - axb);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Y_H_A);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Y_H_A);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Y_L_A);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Y_L_A);
 	ay = -accel_res * (float)(*s_value - ayb);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Z_H_A);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Z_H_A);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Z_L_A);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Z_L_A);
 	az = -accel_res * (float)(*s_value - azb);
 }
 
 // magn bias are predefined values
 const float mxb = -1302.185116f, myb = -545.239796f, mzb = 130.141928;
 
-void lms_magn_read(void) {
+void lsm_magn_read(void) {
 	uint16_t u_value;
 	int16_t *s_value = (int16_t *)(&u_value);
 	float tempx, tempy, tempz;
 
 //	FILE *fd = fopen("/home/root/applications/magn_log.txt", "a");
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_X_H_M);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_H_M);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_X_L_M);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_L_M);
 	tempx = (float)(*s_value) - mxb;
 
 //	fprintf(fd, "%d\t", *s_value);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Y_H_M);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Y_H_M);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Y_L_M);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Y_L_M);
 	tempy =  (float)(*s_value) - myb;
 
 //	fprintf(fd, "%d\t", *s_value);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Z_H_M);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Z_H_M);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_XM, LMS_OUT_Z_L_M);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_Z_L_M);
 	tempz =  (float)(*s_value) - mzb;
 
 //	fprintf(fd, "%d\n", *s_value);
@@ -269,22 +269,22 @@ void lms_magn_read(void) {
 	mz = -magn_res * (- tempx * 0.089238 + tempy * 0.058980 + tempz * 1.233952);
 }
 
-void lms_gyro_read(void) {
+void lsm_gyro_read(void) {
 	uint16_t u_value;
 	int16_t *s_value = (int16_t *)(&u_value);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_X_H_G);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_H_G);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_X_L_G);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_L_G);
 	gx = gyro_res * (float)(*s_value - gxb);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Y_H_G);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Y_H_G);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Y_L_G);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Y_L_G);
 	gy = -gyro_res * (float)(*s_value - gyb);
 
-	u_value = lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Z_H_G);
+	u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Z_H_G);
 	u_value = u_value << 8;
-	u_value += lms_read_byte_data(LMS_ADDRESS_G, LMS_OUT_Z_L_G);
+	u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Z_L_G);
 	gz = -gyro_res * (float)(*s_value - gzb);
 }

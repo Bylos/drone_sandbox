@@ -28,7 +28,7 @@ volatile float yaw, pitch, roll;
 
 void ahrs_BetaUpdate(void) {
 	if (beta > BETA_MIN) {
-		beta -= BETA_STP;
+		beta -= BETA_STEP;
 		if (beta < BETA_MIN) {
 			beta = BETA_MIN;
 		}
