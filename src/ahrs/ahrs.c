@@ -1,32 +1,40 @@
 /*
- * ahrs.c
- *
- *  Created on: 23 févr. 2015
- *      Author: Bylos
- */
+ahrs.c
+Implements orientation filters based on Madgwick's quaternion algorithm
+
+Copyright (C) 2015  Bylos & Korky
+Thanks to Seb Madgwick, Jim Lindblom, Kris Winer
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 
 #include "ahrs.h"
 
-volatile float beta = beta_max;
+volatile float beta = BETA_MAX;
 volatile float q1 = 1.0f, q2 = 0.0f, q3 = 0.0f, q4 = 0.0f;
 volatile float yaw, pitch, roll;
 
 void ahrs_BetaUpdate(void) {
-	if (beta > beta_min) {
-		beta -= beta_rate;
-		if (beta < beta_min) {
-			beta = beta_min;
+	if (beta > BETA_MIN) {
+		beta -= BETA_STP;
+		if (beta < BETA_MIN) {
+			beta = BETA_MIN;
 		}
 	}
 }
 
-// Implementation of Sebastian Madgwick's "...efficient orientation filter for... inertial/magnetic sensor arrays"
-// (see http://www.x-io.co.uk/category/open-source/ for examples and more details)
-// which fuses acceleration, rotation rate, and magnetic moments to produce a quaternion-based estimate of absolute
-// device orientation -- which can be converted to yaw, pitch, and roll. Useful for stabilizing quadcopters, etc.
-// The performance of the orientation filter is at least as good as conventional Kalman-based filtering algorithms
-// but is much less computationally intensive---it can be performed on a 3.3 V Pro Mini operating at 8 MHz!
 void ahrs_Madgwick2014(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz)
 {
   float deltat = AHRS_UPDATE_PERIOD;
@@ -59,7 +67,7 @@ void ahrs_Madgwick2014(float ax, float ay, float az, float gx, float gy, float g
   float q3q4 = q3 * q4;
   float q4q4 = q4 * q4;
 
-  // Normalise accelerometer measurement
+  // Normalize accelerometer measurement
   norm = sqrt(ax * ax + ay * ay + az * az);
   if (norm == 0.0f) return; // handle NaN
   norm = 1.0f/norm;
@@ -67,7 +75,7 @@ void ahrs_Madgwick2014(float ax, float ay, float az, float gx, float gy, float g
   ay *= norm;
   az *= norm;
 
-  // Normalise magnetometer measurement
+  // Normalize magnetometer measurement
   norm = sqrt(mx * mx + my * my + mz * mz);
   if (norm == 0.0f) return; // handle NaN
   norm = 1.0f/norm;
@@ -280,16 +288,6 @@ void ahrs_MadgwickIMU(float ax, float ay, float az, float gx, float gy, float gz
 }
 
 void ahrs_Quaternion2Euler(void) {
-	// Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
-	// In this coordinate system, the positive z-axis is down toward Earth.
-	// Yaw is the angle between Sensor x-axis and Earth magnetic North (or true North if corrected for local declination),
-	// looking down on the sensor positive yaw is counterclockwise.
-	// Pitch is angle between sensor x-axis and Earth ground plane, toward the Earth is positive, up toward the sky is negative.
-	// Roll is angle between sensor y-axis and Earth ground plane, y-axis up is positive roll.
-	// These arise from the definition of the homogeneous rotation matrix constructed from quaternions.
-	// Tait-Bryan angles as well as Euler angles are non-commutative; that is, to get the correct orientation the rotations must be
-	// applied in the correct order which for this configuration is yaw, pitch, and then roll.
-	// For more see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles which has additional links.
 	yaw   = atan2(2.0f * (q2 * q3 + q1 * q4), q1 * q1 + q2 * q2 - q3 * q3 - q4 * q4);
 	pitch = -asin(2.0f * (q2 * q4 - q1 * q3));
 	roll  = atan2(2.0f * (q1 * q2 + q3 * q4), q1 * q1 - q2 * q2 - q3 * q3 + q4 * q4);

@@ -1,32 +1,32 @@
 /*
- * ahrs.h
- *
- *  Created on: 23 févr. 2015
- *      Author: Bylos
- */
+ahrs.h
+Implements orientation filters based on Madgwick's quaternion algorithm
+
+Copyright (C) 2015  Bylos & Korky
+Thanks to Seb Madgwick, Jim Lindblom, Kris Winer
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef AHRS_H_
 #define AHRS_H_
 
 #include <math.h>
 
-// global constants for 9 DoF fusion and AHRS (Attitude and Heading Reference System)
-#define GyroMeasError 3.14159265359f * (40.0f / 180.0f)       // gyroscope measurement error in rads/s (shown as 3 deg/s)
-#define GyroMeasDrift 3.14159265359f * (0.0f / 180.0f)      // gyroscope measurement drift in rad/s/s (shown as 0.0 deg/s/s)
-// There is a tradeoff in the beta parameter between accuracy and response speed.
-// In the original Madgwick study, beta of 0.041 (corresponding to GyroMeasError of 2.7 degrees/s) was found to give optimal accuracy.
-// However, with this value, the LSM9SD0 response time is about 10 seconds to a stable initial quaternion.
-// Subsequent changes also require a longish lag time to a stable output, not fast enough for a quadcopter or robot car!
-// By increasing beta (GyroMeasError) by about a factor of fifteen, the response time constant is reduced to ~2 sec
-// I haven't noticed any reduction in solution accuracy. This is essentially the I coefficient in a PID control sense;
-// the bigger the feedback coefficient, the faster the solution converges, usually at the expense of accuracy.
-// In any case, this is the free parameter in the Madgwick filtering and fusion scheme.
-//#define beta sqrt(3.0f / 4.0f) * GyroMeasError   // compute beta
-#define beta_min 0.1f
-#define beta_max 10.0f
-#define beta_rate 0.1f
-
-//#define zeta sqrt(3.0f / 4.0f) * GyroMeasDrift   // compute zeta, the other free parameter in the Madgwick scheme usually set to a small or zero value
+#define BETA_MIN	0.1f
+#define BETA_MAX	10.0f
+#define BETA_STP	0.1f
 
 #define AHRS_UPDATE_PERIOD	0.01f
 

@@ -1,33 +1,24 @@
 /*
- * PCA9685.c
- *
- *  Created on: 23 févr. 2015
- *      Author: Bylos
- */
+PCA9685.c
+Implements low-level communication and provides convenient functions to
+control PCA9685 on the Intel Edison Platform with I2C bus
 
+Copyright (C) 2015  Bylos & Korky
+Thanks to Georgi Todorov
 
-/*
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Name        : PCA9685.cpp
- * Author      : Georgi Todorov
- * Version     :
- * Created on  : Dec 9, 2012
- *
- * Copyright © 2012 Georgi Todorov  <terahz@geodar.com>
- */
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "PCA9685.h"
 

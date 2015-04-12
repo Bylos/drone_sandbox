@@ -1,12 +1,26 @@
 /*
- * lms9d0.c
- *
- *  Created on: 11 févr. 2015
- *      Author: bmassot
- */
+LSM9DS0.c
+Implements low-level communication and provides convenient functions to
+control LSM9DS0 on the Intel Edison Platform with I2C bus
 
+Copyright (C) 2015  Bylos & Korky
+Thanks to Jim Lindblom, Taylor Andrews
 
-#include "lms9d0.h"
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include "LSM9DS0.h"
 
 // global acceleration, magnetic and gyroscopic variables
 volatile float ax, ay, az, mx, my, mz, gx, gy, gz;

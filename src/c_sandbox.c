@@ -14,7 +14,7 @@
 #include "tools/utils.h"
 
 #include "ahrs/ahrs.h"
-#include "imu/lms9d0.h"
+#include "imu/LSM9DS0.h"
 #include "rflink/uart.h"
 #include "esc/esc.h"
 
@@ -53,7 +53,7 @@ int main(void) {
 
 	timeout_init();
 	int imu_refresh_timer = timeout_set(imu_update_period);
-	while(beta > beta_min) {
+	while(beta > BETA_MIN) {
 		if(timeout_passed(imu_refresh_timer)) {
 			timeout_unset(imu_refresh_timer);
 			imu_refresh_timer = timeout_set(imu_update_period);
