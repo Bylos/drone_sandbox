@@ -26,13 +26,18 @@ volatile float beta = BETA_MAX;
 volatile float q1 = 1.0f, q2 = 0.0f, q3 = 0.0f, q4 = 0.0f;
 volatile float yaw, pitch, roll;
 
-void ahrs_BetaUpdate(void) {
-	if (beta > BETA_MIN) {
-		beta -= BETA_STEP;
-		if (beta < BETA_MIN) {
-			beta = BETA_MIN;
-		}
-	}
+void ahrs_BetaUpdate(float gx, float gy, float gz) {
+	float betaTemp = BETA_MIN;
+	float alphaFilter = 0.5;
+	float angularVelocity = sqrt(gx*gx+gy*gy+gz*gx);
+	float minAngularVelocity = 1.0f; // deg/s
+	float maxAngularVelocity = 600.0f; // deg/s
+
+	if(angularVelocity<minAngularVelocity) betaTemp = BETA_MIN;
+	else if(angularVelocity>=maxAngularVelocity) betaTemp = BETA_MAX;
+	else betaTemp = BETA_MIN + (BETA_MAX - BETA_MIN)/(maxAngularVelocity - minAngularVelocity) * (angularVelocity - minAngularVelocity);
+
+	if(betaTemp>0.0f) beta=alphaFilter*beta+(1.0f-alphaFilter)*betaTemp;
 }
 
 void ahrs_Madgwick2014(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz)

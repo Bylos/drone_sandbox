@@ -32,8 +32,8 @@
 // Defines start (max) and final (min) feedback gain for fast convergence
 // High values gives fast convergence but poor stability
 // Low values gives good stability but induces drifts during fast changes
-#define BETA_MIN	0.1f
-#define BETA_MAX	10.0f
+#define BETA_MIN	0.02f
+#define BETA_MAX	30.0f
 #define BETA_STEP	0.1f
 
 // Madgwick orientation filter's beta gain declaration
@@ -44,10 +44,10 @@ extern volatile float q1, q2, q3, q4;
 extern volatile float yaw, pitch, roll;
 
 /* ahrs_BetaUpdate
- * Decreases beta gain by BETA_STEP if higher than BETA_MIN
- * The function update beta internally
+ * Update dynamically beta feedback gain based on current angular velocity
+ * The update is smoothed with an exponential filter
  */
-void ahrs_BetaUpdate(void);
+void ahrs_BetaUpdate(float gx, float gy, float gz);
 
 /*
  * ahrs_Madgwick2014

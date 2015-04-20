@@ -53,17 +53,9 @@ int main(void) {
 	esc_init(i2c);
 
 	timeout_init();
-	int imu_refresh_timer = timeout_set(imu_update_period);
-	while(beta > BETA_MIN) {
-		if(timeout_passed(imu_refresh_timer)) {
-			timeout_unset(imu_refresh_timer);
-			imu_refresh_timer = timeout_set(imu_update_period);
-			ahrs_BetaUpdate();
-			update_IMU();
-		}
-	}
 
 	int quit = 0;
+	int imu_refresh_timer = timeout_set(imu_update_period);
 	int rf_update_timer = timeout_set(rf_update_period);
 	int main_loop_timer = timeout_set(main_loop_timeout);
 
@@ -76,10 +68,9 @@ int main(void) {
 		}
 
 		if(timeout_passed(rf_update_timer)) {
-				timeout_unset(rf_update_timer);
-				rf_update_timer = timeout_set(rf_update_period);
-				printf("Y%+06.1f   P%+06.1f   R%+06.1f\n", yaw, pitch, roll);
-				send_Euler();
+			timeout_unset(rf_update_timer);
+			rf_update_timer = timeout_set(rf_update_period);
+			send_Euler();
 		}
 
 		command = 0;
@@ -126,6 +117,7 @@ void update_IMU(void) {
 	lsm_magn_read();
 	lsm_gyro_read();
 
+	ahrs_BetaUpdate(gx, gy, gz);
 //	ahrs_Madgwick2014(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f, mx, my, -mz);
 	ahrs_Madgwick2015(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f, mx, my, -mz);
 //	ahrs_MadgwickIMU(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f);
