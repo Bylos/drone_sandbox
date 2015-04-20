@@ -74,3 +74,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.settings/language.settings.xml
+.settings/language.settings.xml
+.settings/language.settings.xml
