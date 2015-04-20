@@ -17,6 +17,7 @@
 #include "imu/LSM9DS0.h"
 #include "rflink/uart.h"
 #include "esc/esc.h"
+#include "ctrl_loop/PID.h"
 
 void update_IMU(void);
 void send_Euler(void);
