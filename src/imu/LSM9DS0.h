@@ -28,8 +28,28 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// Accelerometer, Gyroscope and Magnetometer values declaration
-extern volatile float ax, ay, az, mx, my, mz, gx, gy, gz;
+typedef struct {
+	float x;
+	float y;
+	float z;
+} triaxes_data_t;
+
+typedef struct {
+	triaxes_data_t accel;
+	triaxes_data_t gyro;
+	triaxes_data_t magn;
+} inertial_data_t;
+
+/*
+ * lsm_init get i2c context for future communications
+ * Return 0 if i2c bus is valid
+ */
+int lsm_init(mraa_i2c_context i2c_context);
+
+/*
+ * lsm_intertial_read returns accel, magn and gyro sensors values
+ */
+inertial_data_t lsm_inertial_read(void);
 
 ///////////////////////////
 // LSM9DS0 I2C Addresses //
@@ -126,13 +146,6 @@ extern volatile float ax, ay, az, mx, my, mz, gx, gy, gz;
 #define LSM_ACT_THS             0x3E
 #define LSM_ACT_DUR             0x3F
 
-// Edison board orientation
-typedef enum
-{
-	B_UP = 1,
-	B_DOWN = -1,
-} board_side_t;
-
 // accel_scale defines all possible FSR's of the accelerometer:
 typedef enum
 {
@@ -216,40 +229,5 @@ typedef enum
 	M_ODR_100,  // 100 Hz (0x05)
 } magn_odr_t;
 
-/*
- * lsm_init get i2c context for future communications
- * Return 0 if i2c bus is valid
- */
-int lsm_init(mraa_i2c_context i2c_context, board_side_t side);
-
-/*
- * lsm_accel_start set up and start acceleration sampling
- */
-void lsm_accel_start(accel_scale_t scale, accel_odr_t odr, accel_abw_t abw);
-
-/*
- * lsm_gyro_start set up and start gyroscope sampling
- */
-void lsm_gyro_start(gyro_scale_t scale, gyro_odr_t odr);
-
-/*
- * lsm_magn_start set up and start magnetometer sampling
- */
-void lsm_magn_start(magn_scale_t scale, magn_odr_t odr);
-
-/*
- * lsm_accel_read store acceleration values in ax, ay, az
- */
-void lsm_accel_read(void);
-
-/*
- * lsm_gyro_read store gyroscopic values in gx, gy, gz
- */
-void lsm_gyro_read(void);
-
-/*
- * lsm_magn_read store magnetometer values in mx, my, mz
- */
-void lsm_magn_read(void);
 
 #endif /* _LSM9D0_H_ */
