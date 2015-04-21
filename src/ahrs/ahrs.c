@@ -27,7 +27,7 @@ static float q1 = 1.0f, q2 = 0.0f, q3 = 0.0f, q4 = 0.0f;
 
 void ahrs_BetaUpdate(vector_t gyro) {
 	float betaTemp = BETA_MIN;
-	float alphaFilter = 0.5;
+	float alphaFilter = ALPHA;
 	float angularVelocity = sqrt(gyro.x*gyro.x+gyro.y*gyro.y+gyro.z*gyro.z);
 	float minAngularVelocity = 1.0f; // deg/s
 	float maxAngularVelocity = 600.0f; // deg/s

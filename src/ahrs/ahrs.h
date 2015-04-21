@@ -35,6 +35,7 @@
 // Low values gives good stability but induces drifts during fast changes
 #define BETA_MIN	0.02f
 #define BETA_MAX	30.0f
+#define ALPHA		0.5f
 
 // Enumerates implemented orientation filters
 typedef enum {
