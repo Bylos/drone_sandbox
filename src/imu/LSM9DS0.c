@@ -257,8 +257,8 @@ vector_t lsm_magn_read(void) {
 //	fclose(fd);
 
 	magn.x =  magn_res * (tempx * mx_cal.x + tempy * mx_cal.y + tempz * mx_cal.z);
-	magn.y = -magn_res * (tempx * my_cal.x + tempy * my_cal.y + tempz * my_cal.z);
-	magn.z = -magn_res * (tempx * mz_cal.x + tempy * mz_cal.y + tempz * mz_cal.z);
+	magn.y =  -magn_res * (tempx * my_cal.x + tempy * my_cal.y + tempz * my_cal.z);
+	magn.z =  magn_res * (tempx * mz_cal.x + tempy * mz_cal.y + tempz * mz_cal.z);
 
 	return magn;
 }
@@ -270,7 +270,7 @@ vector_t lsm_gyro_read(void) {
 	u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_H_G);
 	u_value = u_value << 8;
 	u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_L_G);
-	gyro.x =  gyro_res * (float)(*s_value - gxb);
+	gyro.x = gyro_res * (float)(*s_value - gxb);
 
 	u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_Y_H_G);
 	u_value = u_value << 8;
