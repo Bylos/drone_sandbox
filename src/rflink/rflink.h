@@ -30,9 +30,11 @@
 typedef enum {
 	RF_CMD_NONE = 0,
 	RF_CMD_ESC = 'E',
-	RF_CMD_ANGLE = 'A',
-	RF_CMD_STOP = 'S',
+	RF_CMD_PITCH = 'P',
 	RF_CMD_QUIT = 'Q',
+	RF_CMD_ROLL = 'R',
+	RF_CMD_STOP = 'S',
+	RF_CMD_THROTTLE = 'T',
 } rf_command_t;
 
 /* rflink_init
@@ -49,5 +51,30 @@ void rflink_orientation_send(euler_angles_t);
  * Check for a new command from rf comm
  */
 rf_command_t rflink_command_check(void);
+
+/* rflink_read_pitch
+ * Read rf comm to get a new pitch target value if RF_CMD_PITCH was received
+ */
+float rflink_read_pitch(void);
+
+/* rflink_read_roll
+ * Read rf comm to get a new roll target value if RF_CMD_PITCH was received
+ */
+float rflink_read_roll(void);
+
+/* rflink_read_throttle
+ * Read rf comm to get a new throttle target value if RF_CMD_PITCH was received
+ */
+float rflink_read_throttle(void);
+
+/* rflink_get_cmd_esc
+ * Read rf comm to get a new esc value if RF_CMD_ESC was received
+ */
+typedef struct {
+	uint8_t esc_position;
+	float percent_value;
+} rflink_cmd_esc_msg_t;
+rflink_cmd_esc_msg_t rflink_read_esc(void);
+
 
 #endif /* RFLINK_H_ */

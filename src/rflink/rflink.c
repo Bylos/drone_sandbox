@@ -52,6 +52,67 @@ rf_command_t rflink_command_check(void) {
 	return RF_CMD_NONE;
 }
 
+/* rflink_read_pitch
+ * Read rf comm to get a new pitch target value if RF_CMD_PITCH was received
+ */
+float rflink_read_pitch(void) {
+	float pitch;
+	char s_pitch[6];
+
+	while(uart_bytesAvailable() < 6);
+	uart_read(s_pitch, 6);
+	pitch = strtof(s_pitch, NULL);
+
+	return pitch;
+}
+
+/* rflink_read_roll
+ * Read rf comm to get a new roll target value if RF_CMD_PITCH was received
+ */
+float rflink_read_roll(void) {
+	float roll;
+	char s_roll[6];
+
+	while(uart_bytesAvailable() < 6);
+	uart_read(s_roll, 6);
+	roll = strtof(s_roll, NULL);
+
+	return roll;
+}
+
+/* rflink_read_throttle
+ * Read rf comm to get a new pitch target value if RF_CMD_PITCH was received
+ */
+float rflink_read_throttle(void) {
+	float throttle;
+	char s_throttle[6];
+
+	while(uart_bytesAvailable() < 6);
+	uart_read(s_throttle, 6);
+	throttle = strtof(s_throttle, NULL);
+
+	return throttle;
+}
+
+/* rflink_get_cmd_esc
+ * Read rf comm to get a new esc value if RF_CMD_ESC was received
+ */
+rflink_cmd_esc_msg_t rflink_read_esc(void) {
+	rflink_cmd_esc_msg_t msg;
+	char s_esc;
+	char s_power[6];
+
+	while(uart_bytesAvailable() < 1);
+	uart_read(&s_esc, 1);
+	msg.esc_position = strtoul(&s_esc, NULL, 10);
+
+	while(uart_bytesAvailable() < 6);
+	uart_read(s_power, 6);
+	msg.percent_value = strtof(s_power, NULL);
+
+	return msg;
+}
+
 /*void read_esc_power(void) {
 	esc_position_t esc;
 	char s_power[6];
