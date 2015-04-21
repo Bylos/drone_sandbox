@@ -15,19 +15,12 @@
 
 #include "ahrs/ahrs.h"
 #include "imu/LSM9DS0.h"
-#include "rflink/uart.h"
+#include "rflink/rflink.h"
 #include "esc/esc.h"
 #include "ctrl_loop/PID.h"
+#include "types/types.h"
 
-void update_IMU(void);
-void send_Euler(void);
-void read_esc_power(void);
-
-double main_loop_timeout = 2.0;
-double imu_update_period = AHRS_UPDATE_PERIOD;
-double rf_update_period = 0.1;
-
-char command;
+#define MAIN_LOOP_TIMEOUT	10.0f
 
 int main(void) {
 
@@ -43,60 +36,44 @@ int main(void) {
 		return MRAA_ERROR_INVALID_RESOURCE;
 	}
 
-	uart_init();
-
-	lsm_init(i2c, B_UP);
-	lsm_accel_start(A_SCALE_4G, A_ODR_100, A_ABW_50);
-	lsm_magn_start(M_SCALE_2GS, M_ODR_125);
-	lsm_gyro_start(G_SCALE_500DPS, G_ODR_190_BW_125);
-
+	lsm_init(i2c);
 	esc_init(i2c);
-
+	rflink_init();
 	timeout_init();
 
+	inertial_data_t sensors_data;
+	euler_angles_t orientation_angles;
+	rf_command_t command;
+
 	int quit = 0;
-	int imu_refresh_timer = timeout_set(imu_update_period);
-	int rf_update_timer = timeout_set(rf_update_period);
-	int main_loop_timer = timeout_set(main_loop_timeout);
+	int ahrs_update_timer = timeout_set(AHRS_UPDATE_PERIOD);
+	int rf_update_timer = timeout_set(RF_UPDATE_PERIOD);
+	int main_loop_timer = timeout_set(MAIN_LOOP_TIMEOUT);
 
 	while(!(timeout_passed(main_loop_timer)) && !quit) {
 
-		if(timeout_passed(imu_refresh_timer)) {
-			timeout_unset(imu_refresh_timer);
-			imu_refresh_timer = timeout_set(imu_update_period);
-			update_IMU();
+		if(timeout_passed(ahrs_update_timer)) {
+			timeout_unset(AHRS_UPDATE_PERIOD);
+			ahrs_update_timer = timeout_set(AHRS_UPDATE_PERIOD);
+			sensors_data = lsm_inertial_read();
+			orientation_angles = ahrs_orientation_update(sensors_data, AHRS_MADGWICK_2015);
 		}
 
 		if(timeout_passed(rf_update_timer)) {
 			timeout_unset(rf_update_timer);
-			rf_update_timer = timeout_set(rf_update_period);
-			send_Euler();
+			rf_update_timer = timeout_set(RF_UPDATE_PERIOD);
+			rflink_orientation_send(orientation_angles);
 		}
 
-		command = 0;
-		while (uart_read(&command, 1) > 0) {
-			switch(command) {
-			case 'E' :
-				read_esc_power();
-				break;
-			case 'S' :
-				esc_disable_all();
-				break;
-			case 'Q' :
-				quit = 1;
-				break;
-			default :
-				break;
-			}
+		if((command = rflink_command_check()) != RF_CMD_NONE) {
 			timeout_unset(main_loop_timer);
-			main_loop_timer = timeout_set(main_loop_timeout);
+			main_loop_timer = timeout_set(MAIN_LOOP_TIMEOUT);
 		}
 
 		utils_sleep(1.0);
 	}
 
-	printf("Deinit Timer\n");
-	timeout_unset(imu_refresh_timer);
+	timeout_unset(ahrs_update_timer);
 	timeout_unset(rf_update_timer);
 	timeout_unset(main_loop_timer);
 	timeout_deinit();
@@ -109,48 +86,4 @@ int main(void) {
 
 	printf("Exit application \n");
 	return MRAA_SUCCESS;
-}
-
-
-void update_IMU(void) {
-	lsm_accel_read();
-	lsm_magn_read();
-	lsm_gyro_read();
-
-	ahrs_BetaUpdate(gx, gy, gz);
-//	ahrs_Madgwick2014(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f, mx, my, -mz);
-	ahrs_Madgwick2015(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f, mx, my, -mz);
-//	ahrs_MadgwickIMU(ax, ay, az, gx*3.14159265359f/180.0f, gy*3.14159265359f/180.0f, gz*3.14159265359f/180.0f);
-	ahrs_Quaternion2Euler();
-}
-
-void send_Euler(void) {
-	char s_buffer[8];
-	sprintf(s_buffer, "Y%+06.1f", yaw);
-	uart_write(s_buffer, 7);
-	sprintf(s_buffer, "P%+06.1f", pitch);
-	uart_write(s_buffer, 7);
-	sprintf(s_buffer, "R%+06.1f", roll);
-	uart_write(s_buffer, 7);
-	uart_write("\n",1);
-}
-
-void read_esc_power(void) {
-	esc_position_t esc;
-	char s_power[6];
-	char s_esc;
-	float power_percent;
-
-	while(uart_bytesAvailable() < 1);
-	uart_read(&s_esc, 1);
-	esc = strtoul(&s_esc, NULL, 10);
-	while(uart_bytesAvailable() < 5);
-	uart_read(s_power, 5);
-	power_percent = strtof(s_power, NULL);
-	if(power_percent < 0 || power_percent > 100) {
-		esc_disable(esc);
-	}
-	else {
-		esc_set_power(esc, power_percent);
-	}
 }

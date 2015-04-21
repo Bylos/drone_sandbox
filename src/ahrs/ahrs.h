@@ -24,6 +24,7 @@
 #define _AHRS_H_
 
 #include <math.h>
+#include "../types/types.h"
 
 // Defines integration time in orientation filters
 // Calls to filters should be synchronized using this value
@@ -34,47 +35,21 @@
 // Low values gives good stability but induces drifts during fast changes
 #define BETA_MIN	0.02f
 #define BETA_MAX	30.0f
-#define BETA_STEP	0.1f
 
-// Madgwick orientation filter's beta gain declaration
-extern volatile float beta;
-// Quaternions declaration
-extern volatile float q1, q2, q3, q4;
-// Euler's angle declaration
-extern volatile float yaw, pitch, roll;
+// Enumerates implemented orientation filters
+typedef enum {
+	AHRS_MADGWICK_2015,
+	AHRS_MADGWICK_IMU
+} ahrs_filter_t;
 
-/* ahrs_BetaUpdate
- * Update dynamically beta feedback gain based on current angular velocity
- * The update is smoothed with an exponential filter
+/* ahrs_init
+ * initialize internal beta and quaternion values
  */
-void ahrs_BetaUpdate(float gx, float gy, float gz);
+void ahrs_init(void);
 
-/*
- * ahrs_Madgwick2014
- * Original implementation of Madgwick's orientation filter
- * The function update quaternion values internally
+/* ahrs_orientation_update
+ * update quaternion and euler angle from new interial sensors values using a chosen filter
  */
-void ahrs_Madgwick2014(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz);
-
-/*
- * ahrs_Madgwick2014
- * Original implementation of Madgwick's orientation filter
- * The function update quaternion values internally
- */
-void ahrs_Madgwick2015(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz);
-
-/*
- * ahrs_Madgwick2015
- * Updated implementation of Madgwick's orientation filter
- * Thanks to Jeroen van de Mortel <http://diydrones.com/profile/JeroenvandeMortel>
- */
-void ahrs_MadgwickIMU (float ax, float ay, float az, float gx, float gy, float gz);
-
-/*
- * ahrs_Quaternion2Euler
- * Converts quaternion to Trait-Brian angles (z-y-x)
- * Yaw, Pitch and Roll values are updated internally
- */
-void ahrs_Quaternion2Euler(void);
+euler_angles_t ahrs_orientation_update(inertial_data_t data, ahrs_filter_t filter);
 
 #endif /* _AHRS_H_ */

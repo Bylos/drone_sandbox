@@ -25,9 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// local bias variables ///
 // magn bias are predefined values
 const float mxb = -1302.185116f, myb = -545.239796f, mzb = 130.141928;
-const triaxes_data_t mx_cal = {+1.195299f, +0.003829f, -0.089238f};
-const triaxes_data_t my_cal = {+0.003829f, +1.283451f, +0.058980f};
-const triaxes_data_t mz_cal = {-0.089238f, +0.058980f, +1.233952f};
+const vector_t mx_cal = {+1.195299f, +0.003829f, -0.089238f};
+const vector_t my_cal = {+0.003829f, +1.283451f, +0.058980f};
+const vector_t mz_cal = {-0.089238f, +0.058980f, +1.233952f};
 // accel and gyro bias are evaluated at start
 int16_t axb=0, ayb=0, azb=0, gxb=0, gyb=0, gzb=0;
 
@@ -203,10 +203,10 @@ void lsm_gyro_start(gyro_scale_t scale, gyro_odr_t odr) {
 // Sensors Read Functions //
 ////////////////////////////
 
-triaxes_data_t lsm_accel_read(void) {
+vector_t lsm_accel_read(void) {
 	uint16_t u_value;
 	int16_t *s_value = (int16_t *)(&u_value);
-	triaxes_data_t accel;
+	vector_t accel;
 
 	u_value = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_OUT_X_H_A);
 	u_value = u_value << 8;
@@ -226,11 +226,11 @@ triaxes_data_t lsm_accel_read(void) {
 	return accel;
 }
 
-triaxes_data_t lsm_magn_read(void) {
+vector_t lsm_magn_read(void) {
 	uint16_t u_value;
 	int16_t *s_value = (int16_t *)(&u_value);
 	float tempx, tempy, tempz;
-	triaxes_data_t magn;
+	vector_t magn;
 
 //	FILE *fd = fopen("/home/root/applications/magn_log.txt", "a");
 
@@ -263,10 +263,10 @@ triaxes_data_t lsm_magn_read(void) {
 	return magn;
 }
 
-triaxes_data_t lsm_gyro_read(void) {
+vector_t lsm_gyro_read(void) {
 	uint16_t u_value;
 	int16_t *s_value = (int16_t *)(&u_value);
-	triaxes_data_t gyro;
+	vector_t gyro;
 	u_value = lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_H_G);
 	u_value = u_value << 8;
 	u_value += lsm_read_byte_data(LSM_ADDRESS_G, LSM_OUT_X_L_G);

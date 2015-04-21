@@ -27,18 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-typedef struct {
-	float x;
-	float y;
-	float z;
-} triaxes_data_t;
-
-typedef struct {
-	triaxes_data_t accel;
-	triaxes_data_t gyro;
-	triaxes_data_t magn;
-} inertial_data_t;
+#include "../types/types.h"
 
 /*
  * lsm_init get i2c context for future communications
