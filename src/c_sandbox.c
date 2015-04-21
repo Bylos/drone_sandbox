@@ -65,9 +65,43 @@ int main(void) {
 			rflink_orientation_send(orientation_angles);
 		}
 
-		if((command = rflink_command_check()) != RF_CMD_NONE) {
+		while((command = rflink_command_check()) != RF_CMD_NONE) {
 			timeout_unset(main_loop_timer);
 			main_loop_timer = timeout_set(MAIN_LOOP_TIMEOUT);
+
+			rflink_cmd_esc_msg_t cmd_esc;
+			switch(command) {
+			case RF_CMD_QUIT:
+				quit = 1;
+				break;
+			case RF_CMD_STOP:
+				esc_disable_all();
+				break;
+			case RF_CMD_ESC:
+				cmd_esc = rflink_read_esc();
+				if (cmd_esc.percent_value < 0 || cmd_esc.percent_value > 100) {
+					esc_disable(cmd_esc.esc_position);
+				}
+				else {
+					esc_set_power(cmd_esc.esc_position, cmd_esc.percent_value);
+				}
+				break;
+
+			case RF_CMD_THROTTLE:
+				//TODO: Implement ESC common mode (throttle)
+				break;
+
+			case RF_CMD_PITCH:
+				//TODO: Implement Pitch control loop
+				break;
+
+			case RF_CMD_ROLL:
+				//TODO: Implement Roll control loop
+				break;
+
+			default:
+				break;
+			}
 		}
 
 		utils_sleep(1.0);
