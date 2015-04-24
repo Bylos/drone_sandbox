@@ -26,8 +26,18 @@
 #include <mraa.h>
 #include "PCA9685.h"
 
+#define ESC_HI_RATE
 // TODO : Implementation of OneShot125
 
+#ifdef ESC_HI_RATE
+// Defines PWM frequency for ESC refresh rate
+// HI-rate ESCs can go up to 480Hz
+#define ESC_PWM_FREQUENCY	480.0f
+
+// Defines minimum and maximum PWM up-time
+#define MOTOR_OFF	0.000125f
+#define MOTOR_FULL	0.000250f
+#else
 // Defines PWM frequency for ESC refresh rate
 // Standard ESCs uses 50Hz PWM
 #define ESC_PWM_FREQUENCY	50.0f
@@ -35,6 +45,8 @@
 // Defines minimum and maximum PWM up-time
 #define MOTOR_OFF	0.001f
 #define MOTOR_FULL	0.002f
+#endif
+
 
 // Assign ESC positions to PCA9685 PWM channels
 typedef enum {
