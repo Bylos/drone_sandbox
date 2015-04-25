@@ -46,7 +46,7 @@ typedef enum {
 /* ahrs_init
  * initialize internal beta and quaternion values
  */
-void ahrs_init(void);
+int ahrs_init(inertial_data_t data, ahrs_filter_t filter);
 
 /* ahrs_orientation_update
  * update quaternion and euler angle from new interial sensors values using a chosen filter

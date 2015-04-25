@@ -226,12 +226,30 @@ euler_angles_t ahrs_Quaternion2Euler(void) {
 	return angles;
 }
 
-void ahrs_init(void) {
-	q1 = 1.0f;
-	q2 = 0.0f;
-	q3 = 0.0f;
-	q4 = 0.0f;
-	beta = BETA_MAX;
+int ahrs_init(inertial_data_t data, ahrs_filter_t filter) {
+	//printf("%f\n", beta);
+	float beta_rate = 10.0f*AHRS_UPDATE_PERIOD;
+	switch(filter) {
+	case AHRS_MADGWICK_2015:
+		ahrs_Madgwick2015(
+				data.accel.x, data.accel.y, data.accel.z,
+				data.gyro.x*3.14159265359f/180.0f, data.gyro.y*3.14159265359f/180.0f, data.gyro.z*3.14159265359f/180.0f,
+				data.magn.x, data.magn.y, data.magn.z);
+		break;
+	case AHRS_MADGWICK_IMU:
+		ahrs_MadgwickIMU(
+				data.accel.x, data.accel.y, data.accel.z,
+				data.gyro.x*3.14159265359f/180.0f, data.gyro.y*3.14159265359f/180.0f, data.gyro.z*3.14159265359f/180.0f);
+		break;
+	default :
+		break;
+	}
+	beta = beta - beta_rate;
+	if (beta <= BETA_MIN) {
+		beta = BETA_MIN;
+		return 1;
+	}
+	return 0;
 }
 
 euler_angles_t ahrs_orientation_update(inertial_data_t data, ahrs_filter_t filter) {
