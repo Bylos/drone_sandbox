@@ -33,18 +33,18 @@
 #ifdef ESC_FULL_RATE
 // Defines PWM frequency for ESC refresh rate
 // HI-rate ESCs can go up to 480Hz
-#define ESC_PWM_FREQUENCY	1000.0f
+#define ESC_PWM_FREQUENCY	2000.0f
 // Defines minimum and maximum PWM up-time
 #define MOTOR_OFF	0.000125f
 #define MOTOR_FULL	0.000250f
 
 #elseif ESC_HI_RATE
 // Defines PWM frequency for ESC refresh rate
-// HI-rate ESCs can go up to 480Hz
-#define ESC_PWM_FREQUENCY	480.0f
+// HI-rate ESCs can go up to 488Hz
+#define ESC_PWM_FREQUENCY	488.0f
 // Defines minimum and maximum PWM up-time
-#define MOTOR_OFF	0.000125f
-#define MOTOR_FULL	0.000250f
+#define MOTOR_OFF	0.001f
+#define MOTOR_FULL	0.002f
 
 #else
 // Defines PWM frequency for ESC refresh rate
