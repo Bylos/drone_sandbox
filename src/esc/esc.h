@@ -27,8 +27,9 @@
 #include "PCA9685.h"
 
 // Note : Using PCA9685 does not enable a full implementation of OneShot125, but at least enable its rate (up to 2kHz PWM control)
-#define ESC_HI_RATE
-
+#define ESC_FULL_RATE
+//#define ESC_HIGH_RATE
+//#define ESC_LOW_RATE
 
 #ifdef ESC_FULL_RATE
 // Defines PWM frequency for ESC refresh rate
@@ -37,16 +38,18 @@
 // Defines minimum and maximum PWM up-time
 #define MOTOR_OFF	0.000125f
 #define MOTOR_FULL	0.000250f
+#endif
 
-#elseif ESC_HI_RATE
+#ifdef ESC_HIGH_RATE
 // Defines PWM frequency for ESC refresh rate
 // HI-rate ESCs can go up to 488Hz
 #define ESC_PWM_FREQUENCY	488.0f
 // Defines minimum and maximum PWM up-time
 #define MOTOR_OFF	0.001f
 #define MOTOR_FULL	0.002f
+#endif
 
-#else
+#ifdef ESC_LOW_RATE
 // Defines PWM frequency for ESC refresh rate
 // Standard ESCs uses 50Hz PWM
 #define ESC_PWM_FREQUENCY	50.0f
