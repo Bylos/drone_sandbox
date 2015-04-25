@@ -22,6 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LSM9DS0.h"
 
+#define KORKLOS
+//#define BYKORK
+
+#ifdef KORKLOS
 /// local bias variables ///
 // magn bias are predefined values
 const float mxb = -1302.185116f, myb = -545.239796f, mzb = 130.141928;
@@ -29,7 +33,20 @@ const vector_t mx_cal = {+1.195299f, +0.003829f, -0.089238f};
 const vector_t my_cal = {+0.003829f, +1.283451f, +0.058980f};
 const vector_t mz_cal = {-0.089238f, +0.058980f, +1.233952f};
 // accel and gyro bias are evaluated at start
-int16_t axb=0, ayb=0, azb=0, gxb=0, gyb=0, gzb=0;
+int16_t axb=-1750, ayb=-317, azb=132, gxb=0, gyb=0, gzb=0;
+#endif
+
+#ifdef BYKORK
+/// local bias variables ///
+// magn bias are predefined values
+const float mxb = -693.839730f, myb = -450.267501f, mzb = 2842.355726f;
+const vector_t mx_cal = {+1.296327f, +0.033152f, -0.065625f};
+const vector_t my_cal = {+0.033152f, +1.340958f, +0.065625f};
+const vector_t mz_cal = {-0.065625f, +0.065625f, +1.393946f};
+
+// accel and gyro bias are evaluated at start
+int16_t axb=-1750, ayb=-317, azb=132, gxb=0, gyb=0, gzb=0;
+#endif
 
 // global and static
 static mraa_i2c_context i2c = NULL;
@@ -299,8 +316,10 @@ int lsm_init(mraa_i2c_context i2c_context) {
 	lsm_accel_start(A_SCALE_4G, A_ODR_100, A_ABW_50);
 	lsm_magn_start(M_SCALE_2GS, M_ODR_125);
 	lsm_gyro_start(G_SCALE_500DPS, G_ODR_190_BW_125);
+
 	usleep(500000); // wait for sensors first wakeup
-	lsm_accel_bias();
+
+	//lsm_accel_bias();	// Comment if using hardcoded bias values
 	lsm_gyro_bias();
 
 	return 0;
