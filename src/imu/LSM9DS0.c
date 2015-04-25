@@ -63,9 +63,9 @@ void lsm_gyro_bias(void) {
 	// Setup FIFO mode
 	uint8_t ctrl_reg5_g = lsm_read_byte_data(LSM_ADDRESS_G, LSM_CTRL_REG5_G);
 	lsm_write_byte_data(LSM_ADDRESS_G, ctrl_reg5_g | 0x40, LSM_CTRL_REG5_G);
-	usleep(20000);
+	usleep(500000);
 	lsm_write_byte_data(LSM_ADDRESS_G, 0x20|0x1F, LSM_FIFO_CTRL_REG_G);
-	usleep(320000);
+	usleep(500000);
 
 	// Get samples and average bias
 	int samples = (lsm_read_byte_data(LSM_ADDRESS_G, LSM_FIFO_SRC_REG_G) & 0x1F);
@@ -110,9 +110,9 @@ void lsm_accel_bias(void) {
 	// Setup FIFO mode
 	uint8_t ctrl_reg0_xm = lsm_read_byte_data(LSM_ADDRESS_XM, LSM_CTRL_REG0_XM);
 	lsm_write_byte_data(LSM_ADDRESS_XM, ctrl_reg0_xm | 0x40, LSM_CTRL_REG0_XM);
-	usleep(20000);
+	usleep(500000);
 	lsm_write_byte_data(LSM_ADDRESS_XM, 0x20|0x1F, LSM_FIFO_CTRL_REG);
-	usleep(320000);
+	usleep(500000);
 
 	// Get samples and average bias
 	int samples = (lsm_read_byte_data(LSM_ADDRESS_XM, LSM_FIFO_SRC_REG) & 0x1F);
@@ -163,8 +163,6 @@ void lsm_accel_start(accel_scale_t scale, accel_odr_t odr, accel_abw_t abw) {
 
     accel_res = scale == A_SCALE_16G ? 16.0f / 32768.0f :
            (((float) scale + 1.0f) * 2.0f) / 32768.0f;
-
-    lsm_accel_bias();
 }
 
 void lsm_magn_start(magn_scale_t scale, magn_odr_t odr) {
@@ -195,8 +193,6 @@ void lsm_gyro_start(gyro_scale_t scale, gyro_odr_t odr) {
     	gyro_res = 2000.0f / 32768.0f;
         break;
     }
-
-    lsm_gyro_bias();
 }
 
 ////////////////////////////
@@ -303,6 +299,9 @@ int lsm_init(mraa_i2c_context i2c_context) {
 	lsm_accel_start(A_SCALE_4G, A_ODR_100, A_ABW_50);
 	lsm_magn_start(M_SCALE_2GS, M_ODR_125);
 	lsm_gyro_start(G_SCALE_500DPS, G_ODR_190_BW_125);
+	usleep(500000); // wait for sensors first wakeup
+	lsm_accel_bias();
+	lsm_gyro_bias();
 
 	return 0;
 }
