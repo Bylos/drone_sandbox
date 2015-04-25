@@ -28,7 +28,7 @@
 
 // Defines integration time in orientation filters
 // Calls to filters should be synchronized using this value
-#define AHRS_UPDATE_PERIOD	0.01f
+#define AHRS_UPDATE_PERIOD	0.005f
 
 // Defines start (max) and final (min) feedback gain for fast convergence
 // High values gives fast convergence but poor stability

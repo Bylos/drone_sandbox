@@ -25,7 +25,7 @@
 #include "uart.h"
 #include "../types/types.h"
 
-#define RF_UPDATE_PERIOD 0.1f
+#define RF_UPDATE_PERIOD 0.05f
 
 typedef enum {
 	RF_CMD_NONE = 0,
