@@ -30,6 +30,7 @@ static float PID_Ki[PIDS];
 static float PID_Kd[PIDS];
 static float PID_Err[PIDS];
 static float PID_Int[PIDS];
+static float PID_MaxInt[PIDS];
 static float PID_Der[PIDS];
 static float PID_Val[PIDS];
 
@@ -39,7 +40,7 @@ static float PID_Val[PIDS];
  * returns -2, -3 and -4 if the Kp, Ki or Kd value is wrong, respectively
  * returns and int containing the ID of the set pid
  */
- int PID_set(float Kp, float Ki, float Kd, float initVal) {
+int PID_set(float Kp, float Ki, float Kd, float initVal, float maxInt) {
 
 	 int pid ;
 
@@ -57,6 +58,7 @@ static float PID_Val[PIDS];
 
 	 if (Ki<0) return -3;
 	 PID_Ki[pid] = Ki ;
+	 PID_MaxInt[pid] = maxInt ;
 
 	 if (Kd<0) return -4;
 	 PID_Kd[pid] = Kd ;
@@ -65,7 +67,7 @@ static float PID_Val[PIDS];
 	 PID_Val[pid] = initVal;
 
 	 return pid ;
- }
+}
 
 /*
  * Unset a PID
@@ -73,13 +75,13 @@ static float PID_Val[PIDS];
  * Returns -1 if the ID is invalid
  * Returns -1 if the corresponding PID slot is not used
  */
- int PID_unset(const int pid) {
+int PID_unset(const int pid) {
 	    if (pid >= 0 && pid < PIDS) {
 	        /* Only keep TIMEOUT_PASSED for the specified timer. */
 	        const int state = __sync_fetch_and_and(&pid_state[pid], PID_UNUSED);
 
 	        /* Reset the pid parameters */
-	        PID_Kp[pid] = PID_Ki[pid] = PID_Kd[pid] = PID_Int[pid]= PID_Val[pid] = PID_Der[pid] = PID_Err[pid] = 0.0 ;
+	        PID_Kp[pid] = PID_Ki[pid] = PID_Kd[pid] = PID_Int[pid]= PID_Val[pid] = PID_Der[pid] = PID_Err[pid] = PID_MaxInt[pid] = 0.0 ;
 
 	        /* Returns -1 if pid was already not used and 1 if it has been deactivated */
 	        if (state)
@@ -91,16 +93,16 @@ static float PID_Val[PIDS];
 	        /* Invalid timeout number. */
 	        return -1;
 	    }
- }
+}
 
 
- float updatePID(int pid, float targetValue, float currentValue) {
+float updatePID(int pid, float targetValue, float currentValue) {
 	 float error = targetValue -currentValue ;
 
-	 PID_Int[pid] = PID_Int[pid] + error*PID_UPDATE_PERIOD ;
+	 PID_Int[pid] = min(PID_Int[pid] + error*PID_UPDATE_PERIOD,PID_MaxInt[pid]) ;
 	 PID_Der[pid] = (error - PID_Err[pid])/PID_UPDATE_PERIOD ;
 
 	 PID_Val[pid] = PID_Kp[pid]*error+PID_Ki[pid]*PID_Int[pid]+PID_Kd[pid]*PID_Der[pid] ;
 	 PID_Err[pid] = error ;
 	 return PID_Val[pid] ;
- }
+}

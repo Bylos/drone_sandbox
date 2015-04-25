@@ -38,7 +38,7 @@
  * returns -2, -3 and -4 if the Kp, Ki or Kd value is wrong, respectively
  * returns and int containing the ID of the set pid
  */
-int PID_set(float Kp, float Ki, float Kd, float initVal);
+int PID_set(float Kp, float Ki, float Kd, float initVal, float maxInt);
 
 /* PID_unset
  * Unset a PID
