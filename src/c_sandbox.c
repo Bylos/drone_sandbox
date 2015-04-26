@@ -90,11 +90,10 @@ int main(void) {
 			ahrs_update_timer = timeout_set(AHRS_UPDATE_PERIOD);
 
 			//Calculate new orientation
-			//clock_gettime(CLOCK_REALTIME, &time1);
 			sensors_data = lsm_inertial_read();
-			//clock_gettime(CLOCK_REALTIME, &time2);
-			//printf("%d\n", time2.tv_nsec - time1.tv_nsec);
 			orientation_angles = ahrs_orientation_update(sensors_data, AHRS_MADGWICK_2015);
+
+			clock_gettime(CLOCK_REALTIME, &time1);
 
 			//Update PID
 			if(commonPower>=10.0f) {
@@ -111,6 +110,9 @@ int main(void) {
 				esc_set_power(0,0.0f);
 				esc_set_power(1,0.0f);
 			}
+
+			clock_gettime(CLOCK_REALTIME, &time2);
+			printf("%d\n", time2.tv_nsec - time1.tv_nsec);
 		}
 
 		if(timeout_passed(rf_update_timer)) {
