@@ -22,6 +22,9 @@
 
 #define MAIN_LOOP_TIMEOUT	5.0f
 
+struct timespec time1;
+struct timespec time2;
+
 int main(void) {
 
 	mraa_result_print(mraa_init());
@@ -87,7 +90,10 @@ int main(void) {
 			ahrs_update_timer = timeout_set(AHRS_UPDATE_PERIOD);
 
 			//Calculate new orientation
+			//clock_gettime(CLOCK_REALTIME, &time1);
 			sensors_data = lsm_inertial_read();
+			//clock_gettime(CLOCK_REALTIME, &time2);
+			//printf("%d\n", time2.tv_nsec - time1.tv_nsec);
 			orientation_angles = ahrs_orientation_update(sensors_data, AHRS_MADGWICK_2015);
 
 			//Update PID
@@ -110,9 +116,7 @@ int main(void) {
 		if(timeout_passed(rf_update_timer)) {
 			timeout_unset(rf_update_timer);
 			rf_update_timer = timeout_set(RF_UPDATE_PERIOD);
-			//rflink_orientation_send(orientation_angles);
-			euler_angles_t temp = {0.0f, 0.0f, targetRollPos};
-			rflink_orientation_send(temp);
+			rflink_orientation_send(orientation_angles);
 		}
 
 		if((command = rflink_command_check()) != RF_CMD_NONE) {
@@ -125,12 +129,14 @@ int main(void) {
 				quit = 1;
 				break;
 			case RF_CMD_STOP:
-				//esc_disable_all();
+				esc_set_power(ESC_BACK_LEFT, 0.0f);
+				esc_set_power(ESC_BACK_RIGHT, 0.0f);
+				esc_set_power(ESC_FRONT_LEFT, 0.0f);
+				esc_set_power(ESC_FRONT_RIGHT, 0.0f);
 				break;
 			case RF_CMD_ESC:
 				cmd_esc = rflink_read_esc();
 				if (cmd_esc.percent_value < 0 || cmd_esc.percent_value > 100) {
-					//esc_disable(cmd_esc.esc_position);
 					esc_set_power(cmd_esc.esc_position, 0.0f);
 				}
 				else {
@@ -154,7 +160,7 @@ int main(void) {
 			}
 		}
 
-		//utils_sleep(1.0);
+		utils_sleep(1.0);
 	}
 
 	timeout_unset(ahrs_update_timer);

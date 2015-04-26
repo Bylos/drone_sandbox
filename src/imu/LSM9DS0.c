@@ -298,12 +298,33 @@ vector_t lsm_gyro_read(void) {
 	return gyro;
 }
 
+inertial_data_t lsm_inertial_fast_read(void) {
+	uint8_t accel_buffer[6], magn_buffer[6], gyro_buffer[6];
+	uint16_t u_value;
+	int16_t *s_value = (int16_t *)(&u_value);
+
+	inertial_data_t data;
+	mraa_i2c_address(i2c, LSM_ADDRESS_XM);
+	mraa_i2c_read_bytes_data(i2c, 0x80 + LSM_OUT_X_L_A, accel_buffer, 6);
+	mraa_i2c_read_bytes_data(i2c, 0x80 + LSM_OUT_X_L_M, magn_buffer, 6);
+	mraa_i2c_address(i2c, LSM_ADDRESS_G);
+	mraa_i2c_read_bytes_data(i2c, 0x80 + LSM_OUT_X_L_G, gyro_buffer, 6);
+
+	data.accel.x = accel_res*(float)((int16_t)accel_buffer[1]*256+(int16_t)accel_buffer[0]-axb);
+	data.accel.y = -accel_res*(float)(accel_buffer[3]*256+accel_buffer[2]-ayb);
+	data.accel.z = -accel_res*(float)(accel_buffer[5]*256+accel_buffer[4]-azb);
+	data.gyro.x = gyro_res*(float)(gyro_buffer[1]*256+gyro_buffer[0]-gxb);
+	data.gyro.y = -gyro_res*(float)(gyro_buffer[3]*256+gyro_buffer[2]-gyb);
+	data.gyro.z = -gyro_res*(float)(gyro_buffer[5]*256+gyro_buffer[4]-gzb);
+	return data;
+}
+
 inertial_data_t lsm_inertial_read(void) {
 	inertial_data_t sensors_data;
-	sensors_data.accel = lsm_accel_read();
-	sensors_data.gyro = lsm_gyro_read();
-	sensors_data.magn = lsm_magn_read();
-
+	//sensors_data.accel = lsm_accel_read();
+	//sensors_data.gyro = lsm_gyro_read();
+	//sensors_data.magn = lsm_magn_read();
+	lsm_inertial_fast_read();
 	return sensors_data;
 }
 
