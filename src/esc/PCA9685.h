@@ -80,6 +80,13 @@ void pca_setPWMFreq(float freq);
  */
 void pca_setPWMValue(uint8_t ch, int on_value, int off_value);
 
+/* pca_set_fast_0_3_PWM_OnValue
+ * Set PWM up-time for the 4 first channels
+ * Only set off_values, on_values are 0 by default
+ * Use i2c bulk write and auto-increment for faster operation
+ */
+void pca_set_fast_0_3_PWM_OnValue(int on_value0, int on_value1, int on_value2, int on_value3);
+
 /* pca_getPWMValue
  * Return the off-value of desired channel
  */

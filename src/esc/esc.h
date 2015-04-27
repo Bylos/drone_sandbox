@@ -92,6 +92,15 @@ void esc_disable_all();
  */
 int esc_set_power(esc_position_t esc_position, float power_percent);
 
+/* esc_set_fast_power_0_3
+ * Adjust PWM value corresponding to an ESC position
+ * the up-time is based on the percentage provided and
+ * MOTOR_OFF to MOTOR_FULL range
+ * Set values for pwm channels 0 to 3
+ */
+// TODO assign esc position to channels
+void esc_set_fast_power_0_3(float power_percent0, float power_percent1, float power_percent2, float power_percent3);
+
 /* esc_deinit
  * Disable all PWM channels without regarding
  * esc_positions

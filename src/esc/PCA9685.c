@@ -52,24 +52,37 @@ int pca_init(mraa_i2c_context i2c_context, float frequency) {
 }
 
 void pca_setPWMFreq(float freq) {
-
-		uint8_t prescale_val = (PCA_CLOCK_FREQ / 4096.0f / freq)  - 1.0f;
-		pca_write_byte_data(0x10, PCA_MODE1);
-		pca_write_byte_data(prescale_val, PCA_PRE_SCALE);
-		pca_write_byte_data(0x80, PCA_MODE1);
-		pca_write_byte_data(0x00, PCA_MODE2);
+	uint8_t prescale_val = (PCA_CLOCK_FREQ / 4096.0f / freq)  - 1.0f;
+	pca_write_byte_data(0x10, PCA_MODE1);	// enter sleep mode
+	pca_write_byte_data(prescale_val, PCA_PRE_SCALE); // change pwm frequency
+	pca_write_byte_data(0x80 + 0x20, PCA_MODE1); // restart PWM and enable auto-increment address
+	pca_write_byte_data(0x00, PCA_MODE2);
 }
 
 void pca_setPWMValue(uint8_t ch, int on_value, int off_value) {
-		if(on_value > 4095) on_value = 4095;
-		if(on_value < 0) on_value = 0;
-		if(off_value > 4095) off_value = 4095;
-		if(off_value < 0) off_value = 0;
+	if(on_value > 4095) on_value = 4095;
+	if(on_value < 0) on_value = 0;
+	if(off_value > 4095) off_value = 4095;
+	if(off_value < 0) off_value = 0;
 
-		pca_write_byte_data(on_value & 0xFF,	PCA_LED0_ON_L + PCA_LED_MULTIPLYER * ch);
-		pca_write_byte_data(on_value >> 8,		PCA_LED0_ON_H + PCA_LED_MULTIPLYER * ch);
-		pca_write_byte_data(off_value & 0xFF,	PCA_LED0_OFF_L + PCA_LED_MULTIPLYER * ch);
-		pca_write_byte_data(off_value >> 8,		PCA_LED0_OFF_H + PCA_LED_MULTIPLYER * ch);
+	pca_write_byte_data(on_value & 0xFF,	PCA_LED0_ON_L + PCA_LED_MULTIPLYER * ch);
+	pca_write_byte_data(on_value >> 8,		PCA_LED0_ON_H + PCA_LED_MULTIPLYER * ch);
+	pca_write_byte_data(off_value & 0xFF,	PCA_LED0_OFF_L + PCA_LED_MULTIPLYER * ch);
+	pca_write_byte_data(off_value >> 8,		PCA_LED0_OFF_H + PCA_LED_MULTIPLYER * ch);
+}
+
+void pca_set_fast_0_3_PWM_OnValue(int on_value0, int on_value1, int on_value2, int on_value3) {
+	uint8_t buffer[17] = {PCA_LED0_ON_L, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	buffer[2] = on_value0 & 0xFF;
+	buffer[3] = on_value0 >> 8;
+	buffer[6] = on_value1 & 0xFF;
+	buffer[7] = on_value1 >> 8;
+	buffer[10] = on_value2 & 0xFF;
+	buffer[11] = on_value2 >> 8;
+	buffer[14] = on_value3 & 0xFF;
+	buffer[15] = on_value3 >> 8;
+	mraa_i2c_address(i2c, PCA_ADDRESS);
+	mraa_i2c_write(i2c, buffer, 17);
 }
 
 void pca_setAlwaysOff(uint8_t ch) {

@@ -51,6 +51,14 @@ int esc_set_power(esc_position_t esc_position, float power_percent) {
 	return esc_set_uptime(esc_position, power_percent*(MOTOR_FULL-MOTOR_OFF)/100.0f + MOTOR_OFF);
 }
 
+void esc_set_fast_power_0_3(float power_percent0, float power_percent1, float power_percent2, float power_percent3){
+	int value0 = (power_percent0*(MOTOR_FULL-MOTOR_OFF)/100.0f + MOTOR_OFF) * 4096.0f * ESC_PWM_FREQUENCY;
+	int value1 = (power_percent1*(MOTOR_FULL-MOTOR_OFF)/100.0f + MOTOR_OFF) * 4096.0f * ESC_PWM_FREQUENCY;
+	int value2 = (power_percent2*(MOTOR_FULL-MOTOR_OFF)/100.0f + MOTOR_OFF) * 4096.0f * ESC_PWM_FREQUENCY;
+	int value3 = (power_percent3*(MOTOR_FULL-MOTOR_OFF)/100.0f + MOTOR_OFF) * 4096.0f * ESC_PWM_FREQUENCY;
+	pca_set_fast_0_3_PWM_OnValue(value0, value1, value2, value3);
+}
+
 void esc_deinit(void) {
 	pca_setAllAlwaysOff();
 }
