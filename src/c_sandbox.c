@@ -20,10 +20,7 @@
 #include "ctrl_loop/PID.h"
 #include "types/types.h"
 
-#define MAIN_LOOP_TIMEOUT	5.0f
-
-struct timespec time1;
-struct timespec time2;
+#define MAIN_LOOP_TIMEOUT	10.0f
 
 int main(void) {
 
@@ -93,8 +90,6 @@ int main(void) {
 			sensors_data = lsm_inertial_read();
 			orientation_angles = ahrs_orientation_update(sensors_data, AHRS_MADGWICK_2015);
 
-			clock_gettime(CLOCK_REALTIME, &time1);
-
 			//Update PID
 			if(commonPower>=10.0f) {
 				targetRollRate = updatePID(rollPosPID, targetRollPos, orientation_angles.roll);
@@ -104,15 +99,18 @@ int main(void) {
 				} else {
 					 differentialPower = max(differentialPower, -maxDifferentialPower) ;
 				}
-				esc_set_power(0,min(max(commonPower-differentialPower,0.0f),100.0f));
-				esc_set_power(1,min(max(commonPower+differentialPower,0.0f),100.0f));
+				//esc_set_power(0,min(max(commonPower-differentialPower,0.0f),100.0f));
+				//esc_set_power(1,min(max(commonPower+differentialPower,0.0f),100.0f));
+				esc_set_fast_power_0_3(
+						min(max(commonPower-differentialPower,0.0f),100.0f),
+						min(max(commonPower+differentialPower,0.0f),100.0f),
+						0.0f,
+						0.0f);
 			} else {
-				esc_set_power(0,0.0f);
-				esc_set_power(1,0.0f);
+				//esc_set_power(0,0.0f);
+				//esc_set_power(1,0.0f);
+				esc_set_fast_power_0_3(0.0f, 0.0f, 0.0f, 0.0f);
 			}
-
-			clock_gettime(CLOCK_REALTIME, &time2);
-			printf("%d\n", time2.tv_nsec - time1.tv_nsec);
 		}
 
 		if(timeout_passed(rf_update_timer)) {
@@ -131,10 +129,7 @@ int main(void) {
 				quit = 1;
 				break;
 			case RF_CMD_STOP:
-				esc_set_power(ESC_BACK_LEFT, 0.0f);
-				esc_set_power(ESC_BACK_RIGHT, 0.0f);
-				esc_set_power(ESC_FRONT_LEFT, 0.0f);
-				esc_set_power(ESC_FRONT_RIGHT, 0.0f);
+				esc_set_fast_power_0_3(0.0f, 0.0f, 0.0f, 0.0f);
 				break;
 			case RF_CMD_ESC:
 				cmd_esc = rflink_read_esc();
@@ -161,8 +156,6 @@ int main(void) {
 				break;
 			}
 		}
-
-		utils_sleep(1.0);
 	}
 
 	timeout_unset(ahrs_update_timer);
