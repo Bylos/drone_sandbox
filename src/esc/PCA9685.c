@@ -73,14 +73,14 @@ void pca_setPWMValue(uint8_t ch, int on_value, int off_value) {
 
 void pca_set_fast_0_3_PWM_OnValue(int on_value0, int on_value1, int on_value2, int on_value3) {
 	uint8_t buffer[17] = {PCA_LED0_ON_L, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	buffer[2] = on_value0 & 0xFF;
-	buffer[3] = on_value0 >> 8;
-	buffer[6] = on_value1 & 0xFF;
-	buffer[7] = on_value1 >> 8;
-	buffer[10] = on_value2 & 0xFF;
-	buffer[11] = on_value2 >> 8;
-	buffer[14] = on_value3 & 0xFF;
-	buffer[15] = on_value3 >> 8;
+	buffer[3] = on_value0 & 0xFF;
+	buffer[4] = on_value0 >> 8;
+	buffer[7] = on_value1 & 0xFF;
+	buffer[8] = on_value1 >> 8;
+	buffer[11] = on_value2 & 0xFF;
+	buffer[12] = on_value2 >> 8;
+	buffer[15] = on_value3 & 0xFF;
+	buffer[16] = on_value3 >> 8;
 	mraa_i2c_address(i2c, PCA_ADDRESS);
 	mraa_i2c_write(i2c, buffer, 17);
 }
